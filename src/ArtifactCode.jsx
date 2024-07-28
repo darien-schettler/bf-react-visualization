@@ -4,15 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const examples = {
+  helloWorld: '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.',
+  catProgram: '>,[>,]<[<]>[.>]',
+  additionExample: '+++++>+++[<+>-]',
+  multiplicationExample: '+++[>+++++<-]',
+  ifStatementExample: ',[>>+>+<<<-]>>>[<<<+>>>-]>+<<[-----[>]>>[<<<+++>>>[-]]'
+};
+
+const exampleDescriptions = {
+  helloWorld: "Prints 'Hello World!'",
+  catProgram: "Reads input and prints it back (like the UNIX cat command)",
+  additionExample: "Adds 5 and 3",
+  multiplicationExample: "Multiplies 3 by 5",
+  ifStatementExample: "If input equals 5, set y to 3 (non-destructive flow control)"
+};
 
 const BrainfuckDashboard = () => {
-  const initialCode = '++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.';
-  const initialMemory = Array(30).fill(0);
-
-  const [code, setCode] = useState(initialCode);
+  const [code, setCode] = useState(examples.helloWorld);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [memory, setMemory] = useState(initialMemory);
+  const [memory, setMemory] = useState(Array(30).fill(0));
   const [pointer, setPointer] = useState(0);
   const [delay, setDelay] = useState(100);
   const [isRunning, setIsRunning] = useState(false);
@@ -22,7 +36,7 @@ const BrainfuckDashboard = () => {
   const timeoutRef = useRef(null);
 
   const updateVisualization = useCallback(() => {
-    setMemory(initialMemory);
+    setMemory(Array(30).fill(0));
     setPointer(0);
     setOutput('');
     setAsciiValue({ int: 0, char: '' });
@@ -64,8 +78,8 @@ const BrainfuckDashboard = () => {
     let i = 0;
     const stack = [];
     const inp = input.split('');
-    const mem = [...initialMemory];
-    let ptr = 0;
+    const mem = [...memory];
+    let ptr = pointer;
 
     const step = async () => {
       if (i >= code.length) {
@@ -137,8 +151,6 @@ const BrainfuckDashboard = () => {
 
   const resetDashboard = () => {
     stopExecution();
-    setCode(initialCode);
-    setInput('');
     updateVisualization();
   };
 
@@ -154,10 +166,25 @@ const BrainfuckDashboard = () => {
     <div className="space-y-4 p-4 max-w-4xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Canvas-Based Brainfuck Dashboard</CardTitle>
+          <CardTitle>Enhanced Interactive Brainfuck Dashboard</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Select Example:</label>
+              <Select onValueChange={(value) => setCode(examples[value])}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an example" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(examples).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {exampleDescriptions[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Brainfuck Code:</label>
               <Textarea 
@@ -183,7 +210,6 @@ const BrainfuckDashboard = () => {
               <Button onClick={interpret} disabled={isRunning}>Run</Button>
               <Button onClick={stopExecution} disabled={!isRunning}>Stop</Button>
               <Button onClick={resetDashboard}>Reset</Button>
-              <Button onClick={updateVisualization}>Update Visualization</Button>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Execution Speed:</label>
@@ -229,10 +255,13 @@ const BrainfuckDashboard = () => {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Brainfuck Commands</CardTitle>
+          <CardTitle>Brainfuck Basics and Examples</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="list-disc list-inside space-y-1">
+          <p className="mb-4">Brainfuck is an esoteric programming language created by Urban Müller. It consists of only eight simple commands, a data pointer and an array of memory cells initialized to zero.</p>
+          
+          <h3 className="text-lg font-semibold mb-2">Commands:</h3>
+          <ul className="list-disc list-inside space-y-1 mb-4">
             <li><code className="bg-gray-100 px-1 rounded">&gt;</code>: Move the pointer right</li>
             <li><code className="bg-gray-100 px-1 rounded">&lt;</code>: Move the pointer left</li>
             <li><code className="bg-gray-100 px-1 rounded">+</code>: Increment the memory cell at the pointer</li>
@@ -242,6 +271,17 @@ const BrainfuckDashboard = () => {
             <li><code className="bg-gray-100 px-1 rounded">[</code>: Jump past the matching <code className="bg-gray-100 px-1 rounded">]</code> if the cell at the pointer is 0</li>
             <li><code className="bg-gray-100 px-1 rounded">]</code>: Jump back to the matching <code className="bg-gray-100 px-1 rounded">[</code> if the cell at the pointer is nonzero</li>
           </ul>
+
+          <h3 className="text-lg font-semibold mb-2">Example Functionalities:</h3>
+          <ul className="list-disc list-inside space-y-2 mb-4">
+            <li><strong>Hello World:</strong> A classic program that outputs "Hello World!"</li>
+            <li><strong>Cat Program:</strong> Reads input and prints it back, similar to the UNIX cat command</li>
+            <li><strong>Addition:</strong> Demonstrates how to perform addition in Brainfuck</li>
+            <li><strong>Multiplication:</strong> Shows how to multiply two numbers</li>
+            <li><strong>If Statement:</strong> Implements a basic if statement using non-destructive flow control</li>
+          </ul>
+
+          <p className="text-sm italic">Thanks to Katie for the comprehensive Brainfuck tutorial and examples. For more information, visit <a href="https://gist.github.com/roachhd/dce54bec8ba55fb17d3a" className="text-blue-500 hover:underline">Katie's Brainfuck Tutorial</a>.</p>
         </CardContent>
       </Card>
     </div>
